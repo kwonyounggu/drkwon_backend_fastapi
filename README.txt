@@ -14,7 +14,7 @@
    pip3 install passlib or bcrypt for hash passwords before storing them in database
    pip install SQLAlchemy psycopg2
 
-   pip install fastapi uvicorn python-dotenv httpx python-jose google-auth requests passlib SQLAlchemy psycopg2 email-validator
+   pip install fastapi uvicorn python-dotenv httpx python-jose google-auth requests passlib SQLAlchemy psycopg2 email-validator bcrypt
 10. user_info
    {'sub': '111690490420336860549', 'name': 'Younggu Kwon', 'given_name': 'Younggu', 'family_name': 'Kwon', 'picture': 'https://lh3.googleusercontent.com/a/ACg8ocJVD85XO3ajf-ehCz7XrdBJ9OhPUnU7gkyL-Z-hwzNzb-cwGw=s96-c', 'email': 'kwon.younggu@gmail.com', 'email_verified': True}
 

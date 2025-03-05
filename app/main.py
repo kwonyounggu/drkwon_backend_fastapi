@@ -18,7 +18,20 @@ from app.database import SessionLocal
 import app.crud as crud
 import app.schemas as schemas
 
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.utils import utils
+
 app = FastAPI()
+
+#This allows your Flutter app (running on localhost:3000, or whatever port you use) to call FastAPI.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:8080"],  # Your Flutter web app URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Register routers
 app.include_router(user_router)
@@ -102,8 +115,12 @@ async def google_callback(code: str = Query(None), error: str = Query(None), db:
 
         # Check if user exists in the database
         user = crud.get_user_by_email(db, email)
-
-        if not user:
+        print("user returned: ", user)
+        #if True: 
+        #    return "testing ..."
+        
+        #Just insert a new record if not existing in table
+        if user is None:
             # Add the user if not found
             new_user = schemas.UserCreate(
                 email=email,
@@ -113,15 +130,18 @@ async def google_callback(code: str = Query(None), error: str = Query(None), db:
                 name=name,
                 picture=picture
             )
-        user = crud.create_user(db, new_user)
-
+            user = crud.create_user(db, new_user)
+            print("===> created user:", user)
         # Check if user exists (in a real app, check your database)
         #if email not in users:
         #    users[email] = User(email=email)  # Create a new user
 
         #user = users[email]
-        jwt_token = generate_jwt(user)
+        #jwt_token = generate_jwt(user)
+        jwt_token = utils.create_access_token(user_info["sub"], {"name": user_info["name"], "email": user_info["email"]})
 
         # In a real app, you might redirect to your frontend with the JWT
         # or return it in a JSON response.
-        return {"token": jwt_token} #For simplicity, we return the token directly.
+        #return {"token": jwt_token} #For simplicity, we return the token directly.
+        # Redirect back to your Flutter app with the token
+        return RedirectResponse(url=f"http://localhost:8080/#/login-token?jwt={jwt_token}")

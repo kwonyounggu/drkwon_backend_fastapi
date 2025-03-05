@@ -7,8 +7,8 @@ from datetime import datetime, timedelta
 app = FastAPI()
 
 # Google OAuth settings
-GOOGLE_CLIENT_ID = "1037051096786-g3657uojp3s60vbstbef6u87k1ja11qt.apps.googleusercontent.com"
-SECRET_KEY = "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"
+GOOGLE_CLIENT_ID = "apps.googleusercontent.com"
+SECRET_KEY = ""
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

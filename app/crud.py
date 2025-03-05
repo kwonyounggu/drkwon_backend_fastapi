@@ -28,7 +28,20 @@ def get_user(db: Session, user_id: int):
 
 
 def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
+    #return db.query(models.User).filter(models.User.email == email).first()
+    user = db.query(models.User).filter(models.User.email == email).first()
+    if user:
+        return {
+            "user_id": user.user_id,
+            "email": user.email,
+            "password_hash": user.password_hash,
+            "user_type": user.user_type,
+            "auth_method": user.auth_method,
+            "name": user.name,
+            "picture": user.picture
+        }
+    else:
+        return None  # Or handle the case where the user is not found appropriately
 
 
 def update_user(db: Session, user_id: int, updates: schemas.UserCreate):
