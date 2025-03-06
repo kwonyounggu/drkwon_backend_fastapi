@@ -7,6 +7,7 @@ import httpx  # For making HTTP requests
 import os
 from dotenv import load_dotenv
 from urllib.parse import urlencode
+
 from .routers.users import user_router
 from .routers.blogs import blog_router
 from .routers.comments import comment_router
@@ -20,14 +21,14 @@ import app.schemas as schemas
 
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.utils import utils
+from app.utils import utils, constants
 
 app = FastAPI()
 
 #This allows your Flutter app (running on localhost:3000, or whatever port you use) to call FastAPI.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080"],  # Your Flutter web app URL
+    allow_origins=[constants.FLUTTER_HOST_URL],  # Your Flutter web app URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -71,27 +72,34 @@ def generate_jwt(user: User):
     return f"fake_jwt_for_{user.email}"
 
 @app.get("/login/google")
-async def google_login():
-    print("===> google_login() is called")
+async def google_login(state: str = Query(None)):
+    print("===> google_login(", state, ") is called")
     params =  {
                                     "client_id": GOOGLE_CLIENT_ID,
                                     "redirect_uri": GOOGLE_REDIRECT_URI,
                                     "response_type": "code",
                                     "scope": "openid email profile",
                                }
+    
+    #if state:
+    #   params["redirect_uri"] += f"?state={state}"  # Append from parameter
+    # Add the state parameter if provided
+    if state:
+        params["state"] = state  # Pass state as a separate parameter
     auth_url = f"{GOOGLE_AUTH_URL}?{urlencode(params)}"
+
     return RedirectResponse(auth_url)
 
 @app.get("/login/google/callback")
-async def google_callback(code: str = Query(None), error: str = Query(None), db: Session = Depends(get_db)):
-    print("===> google_callback(...) is called")
+async def google_callback(code: str = Query(None), error: str = Query(None), state: str = Query(None), db: Session = Depends(get_db)):
+    print("===> google_callback(", code, state, ") is called")
     if error:
         raise HTTPException(status_code=400, detail=error)
 
     token_data = {
                                     "client_id": GOOGLE_CLIENT_ID,
                                     "client_secret": GOOGLE_CLIENT_SECRET,
-                                    "code": code,
+                                    "rcode": code,
                                     "grant_type": "authorization_code",
                                     "redirect_uri": GOOGLE_REDIRECT_URI,
                                  }
@@ -144,4 +152,8 @@ async def google_callback(code: str = Query(None), error: str = Query(None), db:
         # or return it in a JSON response.
         #return {"token": jwt_token} #For simplicity, we return the token directly.
         # Redirect back to your Flutter app with the token
-        return RedirectResponse(url=f"http://localhost:8080/#/login-token?jwt={jwt_token}")
+        print("=> callback from ", state)
+        redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login-token?jwt={jwt_token}"
+        if state:  # If 'from' parameter exists, append it to the redirect URL
+            redirect_url += f"&from={state}"
+        return RedirectResponse(url=redirect_url)

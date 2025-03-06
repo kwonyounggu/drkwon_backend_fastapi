@@ -8,7 +8,7 @@ import os
 
 # ... (other imports, SECRET_KEY, ALGORITHM, database setup)
 
-CLIENT_ID = "1037051096786-g3657uojp3s60vbstbef6u87k1ja11qt.apps.googleusercontent.com" #Replace with your client ID.
+CLIENT_ID = "apps.googleusercontent.com" #Replace with your client ID.
 ACCESS_TOKEN_EXPIRE_MINUTES = 30 # example.
 
 jwt_secret_key = os.environ.get("JWT_SECRET_KEY")
