@@ -65,15 +65,9 @@ def get_db():
     finally:
         db.close()
 
-def generate_jwt(user: User):
-    # In a real app, implement JWT generation here
-    # (using python-jose or similar)
-    print("===> generate_jwt(user: ", user, ")")
-    return f"fake_jwt_for_{user.email}"
-
 @app.get("/login/google")
-async def google_login(state: str = Query(None)):
-    print("===> google_login(", state, ") is called")
+async def google_login(whereFrom: str = Query(None)):
+    print("===> google_login(", whereFrom, ") is called")
     params =  {
                                     "client_id": GOOGLE_CLIENT_ID,
                                     "redirect_uri": GOOGLE_REDIRECT_URI,
@@ -81,11 +75,8 @@ async def google_login(state: str = Query(None)):
                                     "scope": "openid email profile",
                                }
     
-    #if state:
-    #   params["redirect_uri"] += f"?state={state}"  # Append from parameter
-    # Add the state parameter if provided
-    if state:
-        params["state"] = state  # Pass state as a separate parameter
+    if whereFrom:
+        params["state"] = whereFrom  # Pass whereFrom as a separate parameter
     auth_url = f"{GOOGLE_AUTH_URL}?{urlencode(params)}"
 
     return RedirectResponse(auth_url)
@@ -99,7 +90,7 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
     token_data = {
                                     "client_id": GOOGLE_CLIENT_ID,
                                     "client_secret": GOOGLE_CLIENT_SECRET,
-                                    "rcode": code,
+                                    "code": code,
                                     "grant_type": "authorization_code",
                                     "redirect_uri": GOOGLE_REDIRECT_URI,
                                  }
@@ -123,9 +114,7 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
 
         # Check if user exists in the database
         user = crud.get_user_by_email(db, email)
-        print("user returned: ", user)
-        #if True: 
-        #    return "testing ..."
+        print("user returned from table: ", user)
         
         #Just insert a new record if not existing in table
         if user is None:
@@ -140,20 +129,13 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
             )
             user = crud.create_user(db, new_user)
             print("===> created user:", user)
-        # Check if user exists (in a real app, check your database)
-        #if email not in users:
-        #    users[email] = User(email=email)  # Create a new user
 
-        #user = users[email]
-        #jwt_token = generate_jwt(user)
         jwt_token = utils.create_access_token(user_info["sub"], {"name": user_info["name"], "email": user_info["email"]})
 
-        # In a real app, you might redirect to your frontend with the JWT
-        # or return it in a JSON response.
         #return {"token": jwt_token} #For simplicity, we return the token directly.
         # Redirect back to your Flutter app with the token
         print("=> callback from ", state)
-        redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login-token?jwt={jwt_token}"
+        redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login?jwt={jwt_token}"
         if state:  # If 'from' parameter exists, append it to the redirect URL
-            redirect_url += f"&from={state}"
+            redirect_url += f"&whereFrom={state}"
         return RedirectResponse(url=redirect_url)
