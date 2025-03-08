@@ -8,6 +8,9 @@ import os
 from dotenv import load_dotenv
 from urllib.parse import urlencode
 
+from jose import jwt
+#from app.config import settings
+
 from .routers.users import user_router
 from .routers.blogs import blog_router
 from .routers.comments import comment_router
@@ -137,5 +140,29 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
         print("=> callback from ", state)
         redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login?jwt={jwt_token}"
         if state:  # If 'from' parameter exists, append it to the redirect URL
-            redirect_url += f"&whereFrom={state}"
+            redirect_url += f"&whereFrom={state}&doit=1"
         return RedirectResponse(url=redirect_url)
+
+'''
+@app.post("/refresh")
+async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+    try:
+        payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+        # Verify the refresh token is valid and matches the one in the database
+        user = crud.get_user_by_id(db, user_id)
+        if not user or user.refresh_token != refresh_token:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+
+        # Generate a new access token
+        new_access_token = utils.create_access_token(user_id, {"email": user.email}, expires_delta=timedelta(minutes=15))
+        return {"access_token": new_access_token}
+
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Refresh token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid refresh token")
+'''
