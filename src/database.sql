@@ -25,6 +25,7 @@ CREATE TABLE users
     google_id VARCHAR(100) UNIQUE, -- Unique ID from Google OAuth
     name VARCHAR(100), -- Store user's name from Google
     picture TEXT, -- Store profile picture URL from Google
+    refresh_token VARCHAR(100),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 //Stores blog posts, including their visibility and author.
@@ -94,7 +95,7 @@ CREATE TABLE login_history
 >brew services list //verify if the service is running
 
 >psql postgres
-#CREATE USER admin WITH PASSWORD '277312';
+#CREATE USER admin WITH PASSWORD '277277';
 #CREATE DATABASE eye_care;
 #GRANT ALL PRIVILEGES ON DATABASE eye_care TO admin;
 \q
@@ -117,3 +118,13 @@ brew uninstall postgresql@14
 
 //remove leftover data
 rm -rf /usr/local/var/postgres
+
+################################Create tables ################################
+#to create tables at the first time
+#in virtual path of a terminal
+>python
+python>from app.database import engine
+python>from app.models import Base
+
+#the following will create tables in the connected eye_care database 
+Base.metadata.create_all(bind=engine)

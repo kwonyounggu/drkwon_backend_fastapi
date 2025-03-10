@@ -24,29 +24,14 @@ def create_user(db: Session, user: schemas.UserCreate):
     return db_user
 
 
-def get_user(db: Session, user_id: int):
+def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.user_id == user_id).first()
 
 
 def get_user_by_email(db: Session, email: str):
     #return db.query(models.User).filter(models.User.email == email).first()
     return db.query(models.User).filter(models.User.email == email).first()
-    '''
-    if user:
-        return {
-            "user_id": user.user_id,
-            "email": user.email,
-            "password_hash": user.password_hash,
-            "user_type": user.user_type,
-            "auth_method": user.auth_method,
-            "name": user.name,
-            "picture": user.picture
-        }
-    else:
-        return None  # Or handle the case where the user is not found appropriately
-    '''
-
-
+    
 def update_user(db: Session, user_id: int, updates: schemas.UserCreate):
     db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
     for key, value in updates.dict(exclude_unset=True).items():
@@ -55,6 +40,14 @@ def update_user(db: Session, user_id: int, updates: schemas.UserCreate):
     db.refresh(db_user)
     return db_user
 
+def update_user_refresh_token(db: Session, user_id: int, refresh_token: str):
+    db_user = db.query(models.User).filter(models.User.user_id == user_id).first()
+    if db_user:
+        db_user.refresh_token = refresh_token # type: ignore
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+    return None
 
 def delete_user(db: Session, user_id: int):
     db_user = db.query(models.User).filter(models.User.user_id == user_id).first()

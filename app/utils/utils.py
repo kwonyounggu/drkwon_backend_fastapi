@@ -34,6 +34,17 @@ def create_access_token(user_info_from_google: dict, user_info_from_db: dict, ex
     encoded_jwt = jwt.encode(to_encode, constants.SECRET_KEY, algorithm=constants.ALGORITHM)
     return encoded_jwt
 
+def create_refresh_token(user_id: int, expires_delta: timedelta = None):
+    now = datetime.now(timezone.utc)
+    if expires_delta:
+        expire = now + expires_delta
+    else:
+        expire = now + timedelta(days=7)  # Long-lived refresh token
+
+    to_encode = {"exp": expire, "sub": user_id}
+    encoded_jwt = jwt.encode(to_encode, constants.SECRET_KEY, algorithm=constants.ALGORITHM) 
+    return encoded_jwt
+
 # Example usage
 #user_id = '100402364199988459535'
 #additional_info = {'name': 'younggu kwon', 'email': 'webmonster.ca@gmail.com'}

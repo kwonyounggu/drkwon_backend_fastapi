@@ -10,12 +10,16 @@ class UserCreate(BaseModel):
     name: Optional[str]
     picture: Optional[str]
 
+class UserUpdateRefreshToken(BaseModel):
+    refresh_token: Optional[str]
+    
 class UserResponse(BaseModel):
     user_id: int
     email: str
     user_type: str
     name: Optional[str]
     picture: Optional[str]
+    refresh_token: Optional[str]
     created_at: datetime
 
     class Config:

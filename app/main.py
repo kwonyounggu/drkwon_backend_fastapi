@@ -1,8 +1,12 @@
 # FastAPI (main.py) - Google Login (Simplified)
 
+from datetime import timedelta
 from fastapi import FastAPI, HTTPException, Depends, Request, Response, status, Query
 from fastapi.responses import RedirectResponse
 import httpx  # For making HTTP requests
+import os
+from jose import jwt
+from jose.exceptions import ExpiredSignatureError, JWTError
 
 from urllib.parse import urlencode
 
@@ -24,6 +28,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.utils import utils, constants
 
 app = FastAPI()
+
+##### The simplest way to protect access to /docs and /redoc #####
+app = FastAPI(docs_url="/docs" if os.getenv("ENVIRONMENT") != "production" else None,
+             redoc_url="/redoc" if os.getenv("ENVIRONMENT") != "production" else None)
+
+
+##### you need user name and password to access: https://gemini.google.com/app/5b577630420cefaa
+
 
 #This allows your Flutter app (running on localhost:3000, or whatever port you use) to call FastAPI.
 app.add_middleware(
@@ -115,11 +127,26 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
                 print("===> created user:", user)
 
             #jwt_token = utils.create_access_token(user_info["sub"], {"name": user_info["name"], "email": user_info["email"]})
-            jwt_token = utils.create_access_token(user_info, {"user_id": user.user_id, "user_type": user.user_type, "auth_method":user.auth_method, "is_banned":user.is_banned})
+            access_token = utils.create_access_token(
+                {
+                    "user_id": user.user_id, 
+                    "email": user.email,
+                    "user_type": user.user_type, 
+                    "auth_method":user.auth_method, 
+                    "is_banned":user.is_banned,
+                    "picture": user.picture
+                 })
             #return {"token": jwt_token} #For simplicity, we return the token directly.
             # Redirect back to your Flutter app with the token
-            print("=> callback from ", state)
-            redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login?jwt={jwt_token}"
+            #print("=> callback from ", state)
+            #redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login?jwt={jwt_token}"
+
+            refresh_token = utils.create_refresh_token(user.user_id) # type: ignore
+
+            # Store the refresh token in the database (optional but safer)
+            crud.update_user_refresh_token(db, user.user_id, refresh_token) # type: ignore
+
+            redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login?jwt={access_token}&refresh={refresh_token}"
             if state:  # If 'from' parameter exists, append it to the redirect URL
                 redirect_url += f"&whereFrom={state}&doit=1"
             return RedirectResponse(url=redirect_url)
@@ -128,28 +155,35 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
     except SQLAlchemyError as e:
         raise HTTPException(status_code=500, detail="Database error")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An unexpected error occurred")
-    
-'''
+        raise HTTPException(status_code=500, detail="An unexpected error occurred ")
+     
+
 @app.post("/refresh")
 async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
     try:
-        payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(refresh_token, constants.SECRET_KEY, algorithms=[constants.ALGORITHM])
         user_id = payload.get("sub")
         if not user_id:
-            raise HTTPException(status_code=401, detail="Invalid refresh token")
+            raise HTTPException(status_code=401, detail="Invalid refresh token no user_id")
 
         # Verify the refresh token is valid and matches the one in the database
         user = crud.get_user_by_id(db, user_id)
-        if not user or user.refresh_token != refresh_token:
-            raise HTTPException(status_code=401, detail="Invalid refresh token")
+        if not user or user.refresh_token != refresh_token: # type: ignore
+            raise HTTPException(status_code=401, detail="Invalid refresh token, no user object or different refresh_token")
 
         # Generate a new access token
-        new_access_token = utils.create_access_token(user_id, {"email": user.email}, expires_delta=timedelta(minutes=15))
+        new_access_token = utils.create_access_token(
+            {
+                "user_id": user.user_id, 
+                "email": user.email,
+                "user_type": user.user_type, 
+                "auth_method":user.auth_method, 
+                "is_banned":user.is_banned,
+                "picture": user.picture
+            })
         return {"access_token": new_access_token}
 
-    except jwt.ExpiredSignatureError:
+    except ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Refresh token has expired")
-    except jwt.InvalidTokenError:
+    except JWTError:
         raise HTTPException(status_code=401, detail="Invalid refresh token")
-'''

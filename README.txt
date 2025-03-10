@@ -33,4 +33,5 @@ python>from app.models import Base
 #the following will create tables in the connected eye_care database 
 Base.metadata.create_all(bind=engine)
 
-error: The error you're encountering (AttributeError: module 'bcrypt' has no attribute '__about__')
+#Altering table schemas: 
+see https://www.perplexity.ai/search/what-would-be-the-varchar-size-JkWFVzHhRLG0NBa4UoRDGQ

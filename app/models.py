@@ -16,6 +16,7 @@ class User(Base):
     google_id = Column(String(100), unique=True)
     name = Column(String(100))
     picture = Column(String)
+    refresh_token = Column(String, nullable=True)  # Add this field
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     blogs = relationship("Blog", back_populates="author")
