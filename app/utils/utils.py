@@ -10,7 +10,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 '''
 
-def create_access_token(user_info_from_google: dict, user_info_from_db: dict, expires_delta: timedelta = None):
+#def create_access_token(user_info_from_google: dict, user_info_from_db: dict, expires_delta: timedelta = None):
+def create_access_token(user_info_from_db: dict, expires_delta: timedelta = None):
     to_encode = {}
     now = datetime.now(timezone.utc)
     
@@ -20,10 +21,10 @@ def create_access_token(user_info_from_google: dict, user_info_from_db: dict, ex
         expire = now + timedelta(minutes=constants.ACCESS_TOKEN_EXPIRE_MINUTES)
     
     to_encode.update({
-        "sub": user_info_from_google["sub"],
-        "name": user_info_from_google["name"],
-        "picture_url": user_info_from_google["picture"],
-        "email": user_info_from_google["email"],
+        #"sub": user_info_from_google["sub"],
+        #"name": user_info_from_google["name"],
+        #"picture_url": user_info_from_google["picture"],
+        #"email": user_info_from_google["email"],
         "exp": expire,
         "iat": now,
         "iss": constants.APP_NAME

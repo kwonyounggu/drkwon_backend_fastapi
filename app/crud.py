@@ -1,6 +1,7 @@
 # CRUD functions for FastAPI with SQLAlchemy
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 from . import models, schemas
 from passlib.context import CryptContext
 
@@ -8,6 +9,7 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 # User CRUD
+'''
 def create_user(db: Session, user: schemas.UserCreate):
     hashed_password = pwd_context.hash(user.password)
     db_user = models.User(
@@ -22,6 +24,30 @@ def create_user(db: Session, user: schemas.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+'''
+
+def create_user(db: Session, user: schemas.UserCreate):
+    try:
+        hashed_password = pwd_context.hash(user.password) if user.password else None
+        
+        db_user = models.User(
+            email=user.email,
+            password_hash=hashed_password,
+            user_type=user.user_type,
+            auth_method=user.auth_method,
+            name=user.name,
+            picture=user.picture
+        )
+        
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        return db_user
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        print(f"SQLAlchemyError during user creation: {e}")
+        return None
 
 
 def get_user_by_id(db: Session, user_id: int):

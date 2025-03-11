@@ -113,7 +113,7 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
             print("user returned from table: ", user)
             
             #Just insert a new record if not existing in table
-            if user is None:
+            if not user:
                 # Add the user if not found
                 new_user = schemas.UserCreate(
                     email=email,
@@ -136,11 +136,8 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
                     "is_banned":user.is_banned,
                     "picture": user.picture
                  })
-            #return {"token": jwt_token} #For simplicity, we return the token directly.
-            # Redirect back to your Flutter app with the token
-            #print("=> callback from ", state)
-            #redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login?jwt={jwt_token}"
-
+            
+            #print("New user object:", new_user.dict())
             refresh_token = utils.create_refresh_token(user.user_id) # type: ignore
 
             # Store the refresh token in the database (optional but safer)
@@ -153,9 +150,12 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
     except httpx.HTTPStatusError as e:
         raise HTTPException(status_code=e.response.status_code, detail="Failed to communicate with Google OAuth")
     except SQLAlchemyError as e:
+        db.rollback()
+        print(f"SQLAlchemyError: {e}")
         raise HTTPException(status_code=500, detail="Database error")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="An unexpected error occurred ")
+        print(f"Exception: {e}")
+        raise HTTPException(status_code=500, detail="An unexpected error occurred")
      
 
 @app.post("/refresh")
