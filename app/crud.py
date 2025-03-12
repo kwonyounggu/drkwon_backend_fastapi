@@ -91,7 +91,16 @@ def create_blog(db: Session, blog: schemas.BlogCreate, author_id: int):
 
 def get_blog(db: Session, blog_id: int):
     return db.query(models.Blog).filter(models.Blog.blog_id == blog_id).first()
+'''
+modify later
+# Update get_blog function in crud.py
+def get_blog(db: Session, blog_id: int):
+    return db.query(models.Blog).options(
+        joinedload(models.Blog.author),
+        joinedload(models.Blog.comments).joinedload(models.Comment.user)
+    ).filter(models.Blog.blog_id == blog_id).first()
 
+'''
 
 def update_blog(db: Session, blog_id: int, updates: schemas.BlogCreate):
     db_blog = db.query(models.Blog).filter(models.Blog.blog_id == blog_id).first()

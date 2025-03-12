@@ -7,7 +7,7 @@ db: Session = SessionLocal()
 
 # Seed users
 test_user = models.User(
-    email="test3@example.com",
+    email="test33@example.com",
     password_hash="$2b$12$somethinghashed",
     user_type="General",
     auth_method="Traditional",
@@ -18,7 +18,7 @@ test_user = models.User(
 db.add(test_user)
 
 test_blog = models.Blog(
-    title="Hello World 3",
+    title="Hello World 3py3 ",
     content="This is a test blog 3!",
     author_id=1
 )

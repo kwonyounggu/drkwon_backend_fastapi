@@ -126,19 +126,19 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
                 user = crud.create_user(db, new_user)
                 print("===> created user:", user)
 
-            #jwt_token = utils.create_access_token(user_info["sub"], {"name": user_info["name"], "email": user_info["email"]})
             access_token = utils.create_access_token(
-                {
-                    "user_id": user.user_id, 
-                    "email": user.email,
-                    "user_type": user.user_type, 
-                    "auth_method":user.auth_method, 
-                    "is_banned":user.is_banned,
-                    "picture": user.picture
-                 })
+            {     
+                "user_id": user.user_id, # type: ignore               
+                "email": user.email, # type: ignore
+                "user_type": user.user_type,  # type: ignore
+                "auth_method":user.auth_method,  # type: ignore
+                "is_banned":user.is_banned, # type: ignore
+                "name": user.name, # type: ignore
+                "picture": user.picture # type: ignore
+            })
             
             #print("New user object:", new_user.dict())
-            refresh_token = utils.create_refresh_token(user.user_id) # type: ignore
+            refresh_token = utils.create_refresh_token(user.user_id, user.email) # type: ignore
 
             # Store the refresh token in the database (optional but safer)
             crud.update_user_refresh_token(db, user.user_id, refresh_token) # type: ignore

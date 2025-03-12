@@ -35,14 +35,14 @@ def create_access_token(user_info_from_db: dict, expires_delta: timedelta = None
     encoded_jwt = jwt.encode(to_encode, constants.SECRET_KEY, algorithm=constants.ALGORITHM)
     return encoded_jwt
 
-def create_refresh_token(user_id: int, expires_delta: timedelta = None):
+def create_refresh_token(user_id: int, email: str, expires_delta: timedelta = None):
     now = datetime.now(timezone.utc)
     if expires_delta:
         expire = now + expires_delta
     else:
         expire = now + timedelta(days=7)  # Long-lived refresh token
 
-    to_encode = {"exp": expire, "sub": user_id}
+    to_encode = {"exp": expire, "sub": user_id, "email": email}
     encoded_jwt = jwt.encode(to_encode, constants.SECRET_KEY, algorithm=constants.ALGORITHM) 
     return encoded_jwt
 

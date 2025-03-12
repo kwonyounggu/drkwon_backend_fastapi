@@ -4,3 +4,8 @@ SQLAlchemy
 python-dotenv
 psycopg2
 pydantic
+
+#
+https://www.perplexity.ai/search/about-dashbord-design-and-codi-v8Y1xJaFTkKnzoxOyI01jQ
+python-jose[cryptography]==3.3.0
+passlib[argon2]==1.7.4
