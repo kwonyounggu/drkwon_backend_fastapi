@@ -10,6 +10,8 @@ from jose.exceptions import ExpiredSignatureError, JWTError
 
 from urllib.parse import urlencode
 
+from pydantic import BaseModel
+
 from .routers.users import user_router
 from .routers.blogs import blog_router
 from .routers.comments import comment_router
@@ -157,20 +159,27 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
         print(f"Exception: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
      
-
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+    
 @app.post("/refresh")
-async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+async def refresh_token(request: RefreshTokenRequest, db: Session = Depends(get_db)):
     try:
-        payload = jwt.decode(refresh_token, constants.SECRET_KEY, algorithms=[constants.ALGORITHM])
+        refresh_token = request.refresh_token
+        print("--- 0 ---", refresh_token)
+
+        payload = jwt.decode(refresh_token, constants.SECRET_KEY, algorithms=[constants.ALGORITHM]) # type: ignore
+        print("--- 0.1 ---", payload)
         user_id = payload.get("sub")
+        print("--- 0.2 ---", user_id)
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid refresh token no user_id")
-
+        print("--- 1 ---")
         # Verify the refresh token is valid and matches the one in the database
-        user = crud.get_user_by_id(db, user_id)
+        user = crud.get_user_by_id(db, int(user_id))
         if not user or user.refresh_token != refresh_token: # type: ignore
             raise HTTPException(status_code=401, detail="Invalid refresh token, no user object or different refresh_token")
-
+        print("--- 2 ---")
         # Generate a new access token
         new_access_token = utils.create_access_token(
             {
@@ -181,9 +190,12 @@ async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
                 "is_banned":user.is_banned,
                 "picture": user.picture
             })
+        print("--- 3 ---")
         return {"access_token": new_access_token}
 
-    except ExpiredSignatureError:
+    except ExpiredSignatureError as e:
+        print(f"Expired, {e}")
         raise HTTPException(status_code=401, detail="Refresh token has expired")
-    except JWTError:
+    except JWTError as e:
+        print(f"JWTError, {e}")
         raise HTTPException(status_code=401, detail="Invalid refresh token")

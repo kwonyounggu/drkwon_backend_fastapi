@@ -32,7 +32,7 @@ def create_access_token(user_info_from_db: dict, expires_delta: timedelta = None
     
     to_encode.update(user_info_from_db)
     
-    encoded_jwt = jwt.encode(to_encode, constants.SECRET_KEY, algorithm=constants.ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, constants.SECRET_KEY, algorithm=constants.ALGORITHM) # type: ignore
     return encoded_jwt
 
 def create_refresh_token(user_id: int, email: str, expires_delta: timedelta = None):
@@ -42,8 +42,8 @@ def create_refresh_token(user_id: int, email: str, expires_delta: timedelta = No
     else:
         expire = now + timedelta(days=7)  # Long-lived refresh token
 
-    to_encode = {"exp": expire, "sub": user_id, "email": email}
-    encoded_jwt = jwt.encode(to_encode, constants.SECRET_KEY, algorithm=constants.ALGORITHM) 
+    to_encode = {"exp": expire, "sub": str(user_id), "email": email, "iat": now, "iss": constants.APP_NAME}
+    encoded_jwt = jwt.encode(to_encode, constants.SECRET_KEY, algorithm=constants.ALGORITHM)  # type: ignore
     return encoded_jwt
 
 # Example usage
@@ -64,50 +64,3 @@ def create_refresh_token(user_id: int, email: str, expires_delta: timedelta = No
  'locale': 'en'
 }
 """
-
-'''
-def create_access_token(user_id: str, additional_claims: dict = None, expires_delta: timedelta = None):
-    to_encode = {}
-    now = datetime.now(timezone.utc)
-    
-    if expires_delta:
-        expire = now + expires_delta
-    else:
-        expire = now + timedelta(minutes=constants.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
-    to_encode.update({
-        "sub": user_id,
-        "exp": expire,
-        "iat": now,
-        "iss": constants.APP_NAME
-    })
-    
-    if additional_claims:
-        to_encode.update(additional_claims)
-    
-    encoded_jwt = jwt.encode(to_encode, constants.SECRET_KEY, algorithm=constants.ALGORITHM)
-    return encoded_jwt
-
-from datetime import datetime, timedelta
-import jwt
-from app.config import settings
-
-def create_access_token(user_id: str, data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)  # Short-lived access token
-    to_encode.update({"exp": expire, "sub": user_id})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
-
-def create_refresh_token(user_id: str, expires_delta: timedelta = None):
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(days=7)  # Long-lived refresh token
-    to_encode = {"exp": expire, "sub": user_id}
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-    return encoded_jwt
-'''
