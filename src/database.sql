@@ -128,3 +128,4 @@ python>from app.models import Base
 
 #the following will create tables in the connected eye_care database 
 Base.metadata.create_all(bind=engine)
+

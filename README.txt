@@ -35,3 +35,11 @@ Base.metadata.create_all(bind=engine)
 
 #Altering table schemas: 
 see https://www.perplexity.ai/search/what-would-be-the-varchar-size-JkWFVzHhRLG0NBa4UoRDGQ
+
+##### TO DO LIST ######
+1. table blogs
+   - add updated TIMESTAMP
+   - add rate
+
+2. table users
+   - 
