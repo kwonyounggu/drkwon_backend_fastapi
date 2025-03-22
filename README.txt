@@ -39,7 +39,16 @@ see https://www.perplexity.ai/search/what-would-be-the-varchar-size-JkWFVzHhRLG0
 ##### TO DO LIST ######
 1. table blogs
    - add updated TIMESTAMP
-   - add rate
+   - add rate (recommanded)
+   - add number of views
 
 2. table users
-   - 
+   - class User(BaseModel):
+    id: int
+    email: str
+    password_hash: str  # Hashed password for traditional signup
+    role: str  # "general", "doctor", "admin", "super_admin"
+    is_approved: bool  # For doctors, False by default
+    google_id: Optional[str]  # For Google signup
+    province_state: Optional[str]  # For doctors
+    doctor_type: Optional[str]  # For doctors

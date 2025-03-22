@@ -1,5 +1,5 @@
 # app/db/models.py
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, Boolean, TIMESTAMP, Text, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -12,6 +12,7 @@ class User(Base):
     password_hash = Column(String(255))
     user_type = Column(String(20), nullable=False)
     is_banned = Column(Boolean, default=False)
+    why_is_banned = Column(Text, default=None)
     auth_method = Column(String(20), nullable=False)
     google_id = Column(String(100), unique=True)
     name = Column(String(100))
@@ -30,9 +31,12 @@ class Blog(Base):
     blog_id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
+    rating = Column(Float, default=0.0)
     author_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     visibility = Column(String(20), nullable=False, default='Public')
     is_hidden = Column(Boolean, default=False)
+    why_is_hidden = Column(Text, default=None)
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now()) #Automatically updates to the current timestamp whenever the row is modified.
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     author = relationship("User", back_populates="blogs")
@@ -46,6 +50,7 @@ class Comment(Base):
     user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     content = Column(Text, nullable=False)
     is_hidden = Column(Boolean, default=False)
+    why_is_hidden = Column(Text, default=None)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     blog = relationship("Blog", back_populates="comments")

@@ -12,6 +12,9 @@ class UserCreate(BaseModel):
 
 class UserUpdateRefreshToken(BaseModel):
     refresh_token: Optional[str]
+
+class UserRoleUpdate(BaseModel):
+    new_role: str  #general, doctor, admin
     
 class UserResponse(BaseModel):
     user_id: int
@@ -75,8 +78,8 @@ class AdminActionRequest(BaseModel):
     target_user_id: Optional[int] = None
     target_blog_id: Optional[int] = None
     target_comment_id: Optional[int] = None
-    action_type: str
-    reason: Optional[str] = None
+    action_type: str #'BanUser', 'HideBlog', 'HideComment'
+    reason: str #Reason for the action
 
 #For returning the action details
 class AdminActionResponse(AdminActionRequest):

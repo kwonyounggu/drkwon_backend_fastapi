@@ -2,6 +2,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+
+from app import models
+from app.security import get_current_user
 from .. import crud, schemas, database
 
 
@@ -20,43 +23,32 @@ def create_user(user: schemas.UserCreate, db: Session = db_dependency):
 
 @user_router.get("/{user_id}", response_model=schemas.UserResponse)
 def read_user(user_id: int, db: Session = db_dependency):
-    db_user = crud.get_user(db, user_id)
+    db_user = crud.get_user_by_id(db, user_id)
     if db_user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_user
 
-'''
-##########################
-# Add to users.py
-@user_router.get("/", response_model=list[schemas.UserResponse])
-def read_users(db: Session = db_dependency):
-    return db.query(models.User).all()
+@user_router.patch("/{user_id}/role", response_model=schemas.UserResponse)
+def update_user_role(
+    user_id: int,
+    role_update: schemas.UserRoleUpdate,  # New schema
+    db: Session = db_dependency,
+    current_user: models.User = Depends(get_current_user)
+):
+    # Only allow admins or the user themselves to update the role
+    if current_user.user_id != user_id and current_user.user_type != "admin": # type: ignore
+        raise HTTPException(status_code=403, detail="Unauthorized")
 
-# Add to users.py
-from datetime import datetime, timedelta
-from jose import jwt
+    # Validate role input (optional but recommended)
+    allowed_roles = {"admin", "doctor", "general"}
+    if role_update.new_role not in allowed_roles:
+        raise HTTPException(status_code=400, detail=f"Invalid role: {role_update.new_role}")
 
-@user_router.post("/login")
-def login(user: schemas.UserCreate, db: Session = db_dependency):
-    db_user = crud.get_user_by_email(db, user.email)
-    if not db_user or not pwd_context.verify(user.password, db_user.password_hash):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+    # Attempt to update user role
+    user = crud.update_user_role(db, user_id, role_update.new_role)
     
-    access_token_expires = timedelta(minutes=30)
-    access_token = create_access_token(
-        data={"sub": str(db_user.user_id)}, 
-        expires_delta=access_token_expires
-    )
-    
-    return {"access_token": access_token, "token_type": "bearer"}
+    # Handle user not found case
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-def create_access_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
-'''
+    return user

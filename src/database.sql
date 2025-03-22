@@ -36,7 +36,7 @@ CREATE TABLE blogs
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     author_id INT NOT NULL, -- Foreign key to users table
-    visibility VARCHAR(20) CHECK (visibility IN ('Public', 'DoctorsOnly')) NOT NULL DEFAULT 'Public',
+    visibility VARCHAR(20) CHECK (visibility IN ('Public', 'Doctors')) NOT NULL DEFAULT 'Public',
     is_hidden BOOLEAN DEFAULT FALSE, -- Hide blog if inappropriate
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES users(user_id) ON DELETE CASCADE
