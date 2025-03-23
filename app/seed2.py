@@ -12,8 +12,8 @@ for _ in range(10):
     user = models.User(
         email=fake.email(),
         password_hash=fake.password(length=12),
-        user_type=fake.random_element(elements=("General", "Doctor", "Admin")),
-        auth_method=fake.random_element(elements=("Traditional", "Google")),
+        user_type=fake.random_element(elements=("general", "doctor", "admin")),
+        auth_method=fake.random_element(elements=("traditional", "google")),
         name=fake.name(),
         picture=fake.image_url()
     )
@@ -26,7 +26,7 @@ for author_id in range(1, 6):
             title=fake.sentence(nb_words=6),
             content=fake.paragraph(nb_sentences=10),
             author_id=author_id,
-            visibility=fake.random_element(elements=("Public", "DoctorsOnly"))
+            visibility=fake.random_element(elements=("public", "doctor"))
         )
         db.add(blog)
 

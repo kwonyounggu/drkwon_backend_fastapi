@@ -129,3 +129,9 @@ python>from app.models import Base
 #the following will create tables in the connected eye_care database 
 Base.metadata.create_all(bind=engine)
 
+######### solution about app module not found ######################
+#see https://chat.deepseek.com/a/chat/s/9aaa4545-0218-496b-8848-7d0b8fb5ae76
+3. Run as a Module
+If your script is inside app/, try running it with -m:
+drkwon_backend>python -m app.seed3
+This treats app.seed3 as a module and correctly resolves imports.
