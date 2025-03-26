@@ -143,7 +143,8 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
             refresh_token = utils.create_refresh_token(user.user_id, user.email) # type: ignore
 
             # Store the refresh token in the database (optional but safer)
-            crud.update_user_refresh_token(db, user.user_id, refresh_token) # type: ignore
+            user = crud.update_user_refresh_token(db, user.user_id, refresh_token) # type: ignore
+            print("google_callback->crud.update_user_refresh_token->user.refresh_token=", user.refresh_token)
 
             redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login?jwt={access_token}&refresh={refresh_token}"
             if state:  # If 'from' parameter exists, append it to the redirect URL
@@ -178,6 +179,7 @@ async def refresh_token(request: RefreshTokenRequest, db: Session = Depends(get_
         # Verify the refresh token is valid and matches the one in the database
         user = crud.get_user_by_id(db, int(user_id))
         if not user or user.refresh_token != refresh_token: # type: ignore
+            #print("user: ", user, " user.refresh_token=", user.refresh_token) # type: ignore
             raise HTTPException(status_code=401, detail="Invalid refresh token, no user object or different refresh_token")
         print("--- 2 ---")
         # Generate a new access token
