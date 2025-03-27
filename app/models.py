@@ -11,27 +11,27 @@ class User(Base):
     user_id = Column(Integer, primary_key=True, index=True)
     email = Column(String(100), unique=True, nullable=False)
     password_hash = Column(String(255))
-    user_type = Column(String(20), nullable=False)
+    user_type = Column(String(20), nullable=False) # general, od, md, admin
     is_banned = Column(Boolean, default=False)
     why_is_banned = Column(Text, default=None)
-    auth_method = Column(String(20), nullable=False)
-    google_id = Column(String(100), unique=True, nullable=True)  # Made nullable
-    name = Column(String(100))
-    picture = Column(String)
+    auth_method = Column(String(20), nullable=False) # traditional or google
+    google_id = Column(String(100), unique=True, nullable=True)  # from google user info
+    name = Column(String(100)) # google name first + last name
+    picture = Column(String) # google picture link
     refresh_token = Column(String, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
-    phone_number = Column(String(20), nullable=True)
-    address = Column(Text, nullable=True)
-    date_of_birth = Column(TIMESTAMP, nullable=True)
-    last_login = Column(TIMESTAMP, nullable=True)
-    profile_picture = Column(String, nullable=True)
-    bio = Column(Text, nullable=True)
+    phone_number = Column(String(20), nullable=True) # from profile clinic
+    address = Column(Text, nullable=True) # from profile clinic
+    date_of_birth = Column(TIMESTAMP, nullable=True) # from profile
+    last_login = Column(TIMESTAMP, nullable=True) # whenever logged in
+    profile_picture = Column(String, nullable=True) # from profile
+    bio = Column(Text, nullable=True) # from profile, A short user description
     social_media_links = Column(JSON, nullable=True)
     preferences = Column(JSON, nullable=True)
-    verification_status = Column(String(20), nullable=True)
-    language = Column(String(10), nullable=True)
-    timezone = Column(String(50), nullable=True)
-    location = Column(String, nullable=True)
+    verification_status = Column(String(20), nullable=True) # pending, when admin checks and approves
+    language = Column(String(10), nullable=True) # profile, user's preferred language
+    timezone = Column(String(50), nullable=True) # user's time zone
+    location = Column(String, nullable=True) # profile, location of user
     deleted_at = Column(TIMESTAMP, nullable=True)  # Soft delete
 
     blogs = relationship("Blog", back_populates="author")

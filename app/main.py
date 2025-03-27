@@ -120,8 +120,8 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
                 new_user = schemas.UserCreate(
                     email=email,
                     password="",
-                    user_type="General",
-                    auth_method="Google",
+                    user_type="general", # general, od, md, admin
+                    auth_method="google",
                     name=name,
                     picture=picture
                 )
