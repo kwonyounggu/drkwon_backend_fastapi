@@ -1,6 +1,7 @@
 # FastAPI (main.py) - Google Login (Simplified)
 
 from datetime import timedelta
+import logging
 from fastapi import FastAPI, HTTPException, Depends, Request, Response, status, Query
 from fastapi.responses import RedirectResponse
 import httpx  # For making HTTP requests
@@ -63,9 +64,12 @@ def get_db():
     finally:
         db.close()
 
+# see https://chatgpt.com/c/67e59e66-4d78-800a-8baa-35c635b6b1d7
+logger = logging.getLogger(__name__)
+
 @app.get("/login/google")
 async def google_login(whereFrom: str = Query(None)):
-    print("===> google_login(", whereFrom, ") is called")
+    logger.info("===> google_login(", whereFrom, ") is called")
     params =  {
                                     "client_id": constants.GOOGLE_CLIENT_ID,
                                     "redirect_uri": constants.GOOGLE_REDIRECT_URI,
@@ -80,13 +84,16 @@ async def google_login(whereFrom: str = Query(None)):
     return RedirectResponse(auth_url)
 
 @app.get("/login/google/callback")
-async def google_callback(code: str = Query(None), error: str = Query(None), state: str = Query(None), db: Session = Depends(get_db)):
-    print("===> google_callback(", code, state, ") is called")
+async def google_callback(request: Request, code: str = Query(None), error: str = Query(None), state: str = Query(None), db: Session = Depends(get_db)):
+    logger.info("===> google_callback(", code, state, ") is called")
     if error:
         raise HTTPException(status_code=400, detail=f"Google OAuth error: {error}")
     
     if not code:
         raise HTTPException(status_code=400, detail="Authorization code is missing")
+    
+    # for login_history with client information
+    client_info = utils.get_client_info(request)
 
     token_data = {
                                     "client_id": constants.GOOGLE_CLIENT_ID,
@@ -105,28 +112,28 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
             user_info_response.raise_for_status()
             user_info = user_info_response.json()
 
-            email = user_info["email"]
-            name = user_info.get("name")
-            picture = user_info.get("picture")
-            print("===> user_info: ", user_info)
+            logger.info("===> user_info: ", user_info)
 
             # Check if user exists in the database
-            user = crud.get_user_by_email(db, email)
-            print("user returned from table: ", user)
+            user = crud.get_user_by_email(db, user_info.get("email"))
+            logger.info("user returned from table: ", user)
             
             #Just insert a new record if not existing in table
             if not user:
                 # Add the user if not found
                 new_user = schemas.UserCreate(
-                    email=email,
+                    email=user_info.get("email"),
                     password="",
                     user_type="general", # general, od, md, admin
                     auth_method="google",
-                    name=name,
-                    picture=picture
+                    google_id=user_info.get("sub"),
+                    name=user_info.get("name"),
+                    picture=user_info.get("picture")
                 )
                 user = crud.create_user(db, new_user)
-                print("===> created user:", user)
+                logger.info("===> created user:", user)
+
+            client_info['user_id'] = user.user_id # type: ignore
 
             access_token = utils.create_access_token(
             {     
@@ -144,21 +151,26 @@ async def google_callback(code: str = Query(None), error: str = Query(None), sta
 
             # Store the refresh token in the database (optional but safer)
             user = crud.update_user_refresh_token(db, user.user_id, refresh_token) # type: ignore
-            print("google_callback->crud.update_user_refresh_token->user.refresh_token=", user.refresh_token)
+            
+            #login history
+            crud.create_login_history(db, client_info)
 
             redirect_url = f"{constants.FLUTTER_HOST_URL}/#/login?jwt={access_token}&refresh={refresh_token}"
             if state:  # If 'from' parameter exists, append it to the redirect URL
                 redirect_url += f"&whereFrom={state}&doit=1"
+
             return RedirectResponse(url=redirect_url)
     except httpx.HTTPStatusError as e:
+        logger.error(f"httpx.HTTPStatusError: {e}") # full stack trace then add logger.error(f"..", exc_info=True).
         raise HTTPException(status_code=e.response.status_code, detail="Failed to communicate with Google OAuth")
     except SQLAlchemyError as e:
-        db.rollback()
-        print(f"SQLAlchemyError: {e}")
+        db.rollback() # safe in SQLALchemy
+        logger.error(f"SQLAlchemyError: {e}")
         raise HTTPException(status_code=500, detail="Database error")
     except Exception as e:
-        print(f"Exception: {e}")
+        logger.error(f"Exception: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
+        
      
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
@@ -196,8 +208,8 @@ async def refresh_token(request: RefreshTokenRequest, db: Session = Depends(get_
         return {"access_token": new_access_token}
 
     except ExpiredSignatureError as e:
-        print(f"Expired, {e}")
+        logger.error(f"ExpiredSignatureError: {e}")
         raise HTTPException(status_code=401, detail="Refresh token has expired")
     except JWTError as e:
-        print(f"JWTError, {e}")
+        logger.error(f"JWTError: {e}")
         raise HTTPException(status_code=401, detail="Invalid refresh token")

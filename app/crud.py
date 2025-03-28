@@ -19,6 +19,7 @@ def create_user(db: Session, user: schemas.UserCreate):
             password_hash=hashed_password,
             user_type=user.user_type,
             auth_method=user.auth_method,
+            google_id=user.google_id,
             name=user.name,
             picture=user.picture
         )
@@ -231,6 +232,26 @@ def log_login_attempt(db: Session, login: schemas.LoginHistoryResponse, user_id:
     except SQLAlchemyError:
         db.rollback()
         raise HTTPException(status_code=500, detail="Failed to log login attempt")
+    
+def create_login_history(db: Session, client_info:dict):
+    try:
+        db_login_history = models.LoginHistory(
+            user_id=client_info['user_id'],
+            ip_address=client_info['client_ip'],
+            user_agent=client_info['user_agent'],
+            is_success=True,
+            device_id=client_info['device'],
+            location=client_info['location'],
+            os=client_info['os'],
+            browser=client_info['browser']
+        )
+        db.add(db_login_history)
+        db.commit()
+        db.refresh(db_login_history)
+        return db_login_history
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to insert a login_history record: ${e}")
 
 def get_login_history(db: Session, user_id: int):
     try:

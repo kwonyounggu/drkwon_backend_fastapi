@@ -13,6 +13,7 @@
    pip install python-dotenv httpx
    pip3 install passlib or bcrypt for hash passwords before storing them in database
    pip install SQLAlchemy psycopg2
+   pip install user-agents
 
    pip install fastapi uvicorn python-dotenv httpx python-jose google-auth requests passlib SQLAlchemy psycopg2 email-validator bcrypt
 10. user_info

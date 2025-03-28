@@ -7,6 +7,7 @@ class UserCreate(BaseModel):
     password: str
     user_type: str
     auth_method: str
+    google_id: Optional[str]
     name: Optional[str]
     picture: Optional[str]
 
@@ -14,7 +15,7 @@ class UserUpdateRefreshToken(BaseModel):
     refresh_token: Optional[str]
 
 class UserRoleUpdate(BaseModel):
-    new_role: str  #general, doctor, admin
+    new_role: str  #general, od, md, admin
     
 class UserResponse(BaseModel):
     user_id: int
@@ -27,22 +28,7 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
-'''
-# https://www.perplexity.ai/search/about-dashbord-design-and-codi-v8Y1xJaFTkKnzoxOyI01jQ
-# Update UserResponse schema
-class UserResponse(BaseModel):
-    user_id: int
-    email: str
-    user_type: str
-    name: Optional[str]
-    picture: Optional[str]
-    refresh_token: Optional[str]  # Add this line
-    created_at: datetime
 
-    class Config:
-        from_attributes = True
-
-'''
 class BlogCreate(BaseModel):
     title: str
     content: str

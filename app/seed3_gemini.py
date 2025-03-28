@@ -16,7 +16,7 @@ def generate_fake_data():
         return models.User(
             email=fake.email(),
             password_hash=fake.password(length=12),
-            user_type=fake.random_element(elements=("general", "doctor", "admin"))[:20],
+            user_type=fake.random_element(elements=("general", "od", "md", "admin"))[:20],
             auth_method=fake.random_element(elements=("traditional", "google"))[:20],
             name=fake.name(),
             picture=fake.image_url(),

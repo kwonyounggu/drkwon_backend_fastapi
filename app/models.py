@@ -23,12 +23,12 @@ class User(Base):
     phone_number = Column(String(20), nullable=True) # from profile clinic
     address = Column(Text, nullable=True) # from profile clinic
     date_of_birth = Column(TIMESTAMP, nullable=True) # from profile
-    last_login = Column(TIMESTAMP, nullable=True) # whenever logged in
+    last_login = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now()) # whenever logged in
     profile_picture = Column(String, nullable=True) # from profile
     bio = Column(Text, nullable=True) # from profile, A short user description
     social_media_links = Column(JSON, nullable=True)
     preferences = Column(JSON, nullable=True)
-    verification_status = Column(String(20), nullable=True) # pending, when admin checks and approves
+    verification_status = Column(String(20), nullable=True, default='pending') # pending, when admin checks and approves
     language = Column(String(10), nullable=True) # profile, user's preferred language
     timezone = Column(String(50), nullable=True) # user's time zone
     location = Column(String, nullable=True) # profile, location of user
