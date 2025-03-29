@@ -40,7 +40,7 @@ def update_user_role(
         raise HTTPException(status_code=403, detail="Unauthorized")
 
     # Validate role input (optional but recommended)
-    allowed_roles = {"admin", "doctor", "general"}
+    allowed_roles = {"admin", "od", "md" "general"}
     if role_update.new_role not in allowed_roles:
         raise HTTPException(status_code=400, detail=f"Invalid role: {role_update.new_role}")
 
