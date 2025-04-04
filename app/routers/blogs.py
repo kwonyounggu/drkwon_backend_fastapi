@@ -1,6 +1,8 @@
 # API Routes for FastAPI with SQLAlchemy
 
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
 from app.security import get_current_user
@@ -25,15 +27,33 @@ def read_blog(blog_id: int, db: Session = db_dependency):
     return db_blog
 
 #############
+# See https://chatgpt.com/c/67ef277f-3ff8-800a-95e3-c1e90d14fd96
 @blog_router.get("/", response_model=list[schemas.BlogResponse])
 def read_blogs(
-    visibility: str = Query(None, description="Filter by visibility (Public/Doctors)"),
+    visibility: Optional[str] = Query(None, description="Filter by visibility (public/doctor)"),
+    is_hidden: Optional[bool] = Query(None, description="Filter by hidden status (True/False)"),
+    page: int = Query(1, ge=1, description="Page number, starting from 1"),
+    per_page: int = Query(10, ge=1, le=100, description="Number of records per page"),
     db: Session = db_dependency
 ):
+    
     query = db.query(models.Blog)
     if visibility:
-        query = query.filter(models.Blog.visibility == visibility)
-    return query.all()
+        query = query.filter(models.Blog.visibility == visibility.lower())
+    if is_hidden is not None:
+        query = query.filter(models.Blog.is_hidden == is_hidden)
+
+    # Soft delete filter (optional but recommended)
+    query = query.filter(models.Blog.deleted_at == None)
+
+    # Order by most recent
+    query = query.order_by(desc(models.Blog.updated_at))
+    
+    # Pagination
+    offset = (page - 1) * per_page
+    blogs = query.offset(offset).limit(per_page).all()
+    
+    return blogs
 
 # Add patch and delete endpoints
 @blog_router.patch("/{blog_id}", response_model=schemas.BlogResponse)

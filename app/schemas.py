@@ -38,9 +38,19 @@ class BlogResponse(BaseModel):
     blog_id: int
     title: str
     content: str
+    rating: float
+    num_views: int
     visibility: str
     is_hidden: bool
+    updated_at: datetime
     created_at: datetime
+    cover_image: str
+    allow_comments: bool
+    estimated_reading_time: int
+    meta_title: str
+    meta_description: str
+    keywords: str
+    slug: str
     author: UserResponse
 
     class Config:
