@@ -38,7 +38,7 @@ def read_blogs(
 ):
     
     query = db.query(models.Blog)
-    if visibility:
+    if visibility and visibility in ['public', 'doctor']:
         query = query.filter(models.Blog.visibility == visibility.lower())
     if is_hidden is not None:
         query = query.filter(models.Blog.is_hidden == is_hidden)
@@ -70,6 +70,8 @@ def delete_blog_endpoint(blog_id: int, db: Session = db_dependency):
     return {"message": "Blog deleted successfully"}
 
 # Example protected endpoint
+# see https://gemini.google.com/gem/coding-partner/d6794c28c9739883
+# will show you how to create keywords, summary/excerpt
 @blog_router.post("/", response_model=schemas.BlogResponse)
 def create_blog(
     blog: schemas.BlogCreate,

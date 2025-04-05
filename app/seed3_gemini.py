@@ -40,6 +40,8 @@ def generate_fake_data():
         )
 
     # Helper function for creating blogs
+    # See https://gemini.google.com/gem/coding-partner/d6794c28c9739883
+    # will show you how to get keywords, excerpt
     def create_blog(author_id):
         return models.Blog(
             title=fake.sentence(nb_words=6),
