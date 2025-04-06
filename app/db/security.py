@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 
 from app.utils import constants
-from . import schemas, crud, database
+from app.db import schemas, crud, database
 
 from sqlalchemy.orm import Session
 

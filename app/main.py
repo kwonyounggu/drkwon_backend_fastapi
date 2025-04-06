@@ -22,9 +22,9 @@ from .routers.login_history import login_router
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.database import SessionLocal
-import app.crud as crud
-import app.schemas as schemas
+from app.db.database import SessionLocal
+from app.db import schemas, crud
+from app.db.events import update_updated_at_before_update #set event listener
 
 from fastapi.middleware.cors import CORSMiddleware
 

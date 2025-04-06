@@ -3,7 +3,7 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
-from . import models, schemas
+from app.db import models, schemas
 from passlib.context import CryptContext
 
 #pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -85,7 +85,7 @@ def update_user_role(db: Session, user_id: int, new_role: str):
             raise HTTPException(status_code=404, detail="User not found")
 
         # Optional: Validate `new_role` against allowed values
-        allowed_roles = {"General", "Doctor", "Admin"}
+        allowed_roles = {"general", "od", "md" "admin"}
         if new_role not in allowed_roles:
             raise HTTPException(status_code=400, detail="Invalid role")
 
@@ -128,9 +128,14 @@ def create_blog(db: Session, blog: schemas.BlogCreate, author_id: int):
 
 def get_blog(db: Session, blog_id: int):
     try:
-        return db.query(models.Blog).filter(models.Blog.blog_id == blog_id).first()
+        #return db.query(models.Blog).filter(models.Blog.blog_id == blog_id).first()
+        blog = db.query(models.Blog).filter(models.Blog.blog_id == blog_id).first()
+        blog.num_views += 1 # type: ignore
+        db.commit()
+        return blog
     except SQLAlchemyError:
-        raise HTTPException(status_code=500, detail="Database error")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Database error while updating blog.num_views")
     
 '''
 modify later

@@ -5,8 +5,8 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from app.security import get_current_user
-from .. import crud, schemas, database, models
+from app.db.security import get_current_user
+from app.db import crud, schemas, database, models
 
 
 db_dependency = Depends(database.get_db)
@@ -19,16 +19,16 @@ blog_router = APIRouter(prefix="/blogs", tags=["Blogs"])
 #    return crud.create_blog(db, blog, author_id)
 
 
-@blog_router.get("/{blog_id}", response_model=schemas.BlogResponse)
+@blog_router.get("/{blog_id}", response_model=schemas.BlogSpecificResponse)
 def read_blog(blog_id: int, db: Session = db_dependency):
     db_blog = crud.get_blog(db, blog_id)
     if db_blog is None:
-        raise HTTPException(status_code=404, detail="Blog not found")
+        raise HTTPException(status_code=404, detail="Blog not found with ${blog_id}")
     return db_blog
 
 #############
 # See https://chatgpt.com/c/67ef277f-3ff8-800a-95e3-c1e90d14fd96
-@blog_router.get("/", response_model=list[schemas.BlogResponse])
+@blog_router.get("/", response_model=list[schemas.BlogListResponse])
 def read_blogs(
     visibility: Optional[str] = Query(None, description="Filter by visibility (public/doctor)"),
     is_hidden: Optional[bool] = Query(None, description="Filter by hidden status (True/False)"),
@@ -56,7 +56,7 @@ def read_blogs(
     return blogs
 
 # Add patch and delete endpoints
-@blog_router.patch("/{blog_id}", response_model=schemas.BlogResponse)
+@blog_router.patch("/{blog_id}", response_model=schemas.BlogSpecificResponse)
 def update_blog(
     blog_id: int,
     blog_update: schemas.BlogCreate,
@@ -72,7 +72,7 @@ def delete_blog_endpoint(blog_id: int, db: Session = db_dependency):
 # Example protected endpoint
 # see https://gemini.google.com/gem/coding-partner/d6794c28c9739883
 # will show you how to create keywords, summary/excerpt
-@blog_router.post("/", response_model=schemas.BlogResponse)
+@blog_router.post("/", response_model=schemas.BlogSpecificResponse)
 def create_blog(
     blog: schemas.BlogCreate,
     current_user: schemas.UserResponse = Depends(get_current_user),

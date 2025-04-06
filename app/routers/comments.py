@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from .. import crud, schemas, database
+from app.db import crud, schemas, database
 
 
 db_dependency = Depends(database.get_db)

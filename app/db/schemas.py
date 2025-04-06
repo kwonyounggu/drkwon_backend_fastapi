@@ -34,7 +34,30 @@ class BlogCreate(BaseModel):
     content: str
     visibility: str
 
-class BlogResponse(BaseModel):
+class BlogListResponse(BaseModel):
+    blog_id: int
+    title: str
+    #content: str
+    rating: float
+    num_views: int
+    #visibility: str
+    #is_hidden: bool
+    updated_at: datetime
+    #created_at: datetime
+    cover_image: str
+    #allow_comments: bool
+    excerpt: str
+    estimated_reading_time: int
+    #meta_title: str
+    #meta_description: str
+    #keywords: str
+    slug: str #10-tips-for-eye-health-in-2025 from 10 Tips for Eye Health in 2025
+    author: UserResponse
+
+    class Config:
+        from_attributes = True
+
+class BlogSpecificResponse(BaseModel):
     blog_id: int
     title: str
     content: str
@@ -50,7 +73,7 @@ class BlogResponse(BaseModel):
     meta_title: str
     meta_description: str
     keywords: str
-    slug: str
+    slug: str #A slug is a URL-friendly version of a blog title, typically lowercase, with spaces and special characters replaced by dashes.
     author: UserResponse
 
     class Config:

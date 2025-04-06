@@ -2,7 +2,7 @@
 from sqlalchemy import JSON, Column, Integer, String, Float, Boolean, TIMESTAMP, Text, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from .database import Base
+from app.db.database import Base
 #Gemini helped for the additional fields Mar 22 2025
 #Ref: https://gemini.google.com/app/3e634dc60d18d4bf
 class User(Base):
@@ -51,7 +51,7 @@ class Blog(Base):
     visibility = Column(String(20), nullable=False, default='public')
     is_hidden = Column(Boolean, default=False)
     why_is_hidden = Column(Text, default=None)
-    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+    updated_at = Column(TIMESTAMP, server_default=func.now()) #, onupdate=func.now())
     created_at = Column(TIMESTAMP, server_default=func.now())
     tags = Column(JSON, nullable=True)
     cover_image = Column(String, nullable=True)

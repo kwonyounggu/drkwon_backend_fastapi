@@ -3,9 +3,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from app import models
-from app.security import get_current_user
-from .. import crud, schemas, database
+from app.db.security import get_current_user
+from app.db import models, crud, schemas, database
 
 
 db_dependency = Depends(database.get_db)
