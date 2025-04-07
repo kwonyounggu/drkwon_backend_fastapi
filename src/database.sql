@@ -84,8 +84,12 @@ CREATE TABLE login_history
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
 
+
+####
+# See https://chat.deepseek.com/a/chat/s/4429ef91-cf0f-4f0e-b533-d1a6203750fd
+####
 >brew install postgresql
-//brew services start postgresql
+//brew services start postgresql@14
 
 //To start postgresql@14 now and restart at login:
 >brew services start postgresql@14

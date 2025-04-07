@@ -37,19 +37,6 @@ Base.metadata.create_all(bind=engine)
 #Altering table schemas: 
 see https://www.perplexity.ai/search/what-would-be-the-varchar-size-JkWFVzHhRLG0NBa4UoRDGQ
 
-##### TO DO LIST ######
-1. table blogs
-   - add updated TIMESTAMP
-   - add rate (recommanded)
-   - add number of views
-
-2. table users
-   - class User(BaseModel):
-    id: int
-    email: str
-    password_hash: str  # Hashed password for traditional signup
-    role: str  # "general", "doctor", "admin", "super_admin"
-    is_approved: bool  # For doctors, False by default
-    google_id: Optional[str]  # For Google signup
-    province_state: Optional[str]  # For doctors
-    doctor_type: Optional[str]  # For doctors
+# See https://chatgpt.com/c/67f33623-a9d0-800a-a7d4-8bd1ea33cb17
+#mobile phone can be accessible
+>uvicorn app.main:app --host 0.0.0.0 --port 8000 

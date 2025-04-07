@@ -43,7 +43,8 @@ app = FastAPI(docs_url="/docs" if os.getenv("ENVIRONMENT") != "production" else 
 #This allows your Flutter app (running on localhost:3000, or whatever port you use) to call FastAPI.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[constants.FLUTTER_HOST_URL],  # Your Flutter web app URL
+    # allow_origins=[constants.FLUTTER_HOST_URL],  # Your Flutter web app URL
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
