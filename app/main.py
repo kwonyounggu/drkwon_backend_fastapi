@@ -13,11 +13,12 @@ from urllib.parse import urlencode
 
 from pydantic import BaseModel
 
-from .routers.users import user_router
-from .routers.blogs import blog_router
-from .routers.comments import comment_router
-from .routers.admin_actions import admin_router
-from .routers.login_history import login_router
+#from app.routers.users import user_router
+#from app.routers.blogs import blog_router
+#from app.routers.comments import comment_router
+#from app.routers.admin_actions import admin_router
+#from app.routers.login_history import login_router
+from app.routers import search, login_history, admin_actions, comments, blogs, users
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
@@ -51,11 +52,12 @@ app.add_middleware(
 )
 
 # Register routers
-app.include_router(user_router)
-app.include_router(blog_router)
-app.include_router(comment_router)
-app.include_router(admin_router)
-app.include_router(login_router)
+app.include_router(users.user_router)
+app.include_router(blogs.blog_router)
+app.include_router(comments.comment_router)
+app.include_router(admin_actions.admin_router)
+app.include_router(login_history.login_router)
+app.include_router(search.search_router)
 
 
 def get_db():

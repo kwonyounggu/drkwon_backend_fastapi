@@ -119,3 +119,13 @@ class LoginHistoryResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class SearchResult(BaseModel):
+    type: str  # "blog" or "comment"
+    id: int
+    title: Optional[str] = None
+    content: str
+    author_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
