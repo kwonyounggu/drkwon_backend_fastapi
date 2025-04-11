@@ -46,6 +46,8 @@ class Blog(Base):
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
     rating = Column(Float, default=0.0)
+    likes = Column(Integer, default=0)
+    dislikes = Column(Integer, default=0)
     num_views = Column(Integer, default=0)
     author_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     visibility = Column(String(20), nullable=False, default='public')

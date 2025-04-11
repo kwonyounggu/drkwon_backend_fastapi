@@ -46,6 +46,9 @@ def generate_fake_data():
         return models.Blog(
             title=fake.sentence(nb_words=6),
             content=fake.paragraph(nb_sentences=10),
+            likes=random.randint(1, 100),
+            dislikes=random.randint(0, 50),
+            num_views=random.randint(1, 100),
             author_id=author_id,
             visibility=fake.random_element(elements=("public", "doctor")),
             tags=[fake.word() for _ in range(random.randint(1, 5))],
@@ -118,19 +121,19 @@ def generate_fake_data():
         )
 
     # Seed users
-    users = [create_user() for _ in range(10)]
+    users = [create_user() for _ in range(100)]
     db.add_all(users)
     db.commit()
     user_ids = [user.user_id for user in users] # get the user ids
 
     # Seed blogs
-    blogs = [create_blog(author_id) for author_id in user_ids[:5] for _ in range(3)]  # Limit authors to first 5 users
+    blogs = [create_blog(author_id) for author_id in user_ids[:50] for _ in range(3)]  # Limit authors to first 5 users
     db.add_all(blogs)
     db.commit()
     blog_ids = [blog.blog_id for blog in blogs] # get blog ids
 
     # Seed comments
-    comments = [create_comment(random.choice(blog_ids), random.choice(user_ids)) for _ in range(50)]
+    comments = [create_comment(random.choice(blog_ids), random.choice(user_ids)) for _ in range(150)]
     db.add_all(comments)
     db.commit()
     comment_ids = [comment.comment_id for comment in comments]

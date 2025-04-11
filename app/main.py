@@ -13,11 +13,6 @@ from urllib.parse import urlencode
 
 from pydantic import BaseModel
 
-#from app.routers.users import user_router
-#from app.routers.blogs import blog_router
-#from app.routers.comments import comment_router
-#from app.routers.admin_actions import admin_router
-#from app.routers.login_history import login_router
 from app.routers import search, login_history, admin_actions, comments, blogs, users
 
 from sqlalchemy.orm import Session

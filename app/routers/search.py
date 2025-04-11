@@ -34,15 +34,21 @@ def search(query: str = Query(..., min_length=1), include_author: bool = Query(F
             id=blog.blog_id, # type: ignore
             title=blog.title, # type: ignore
             content=blog.excerpt, # type: ignore because content is too long
-            author_name=blog.author.name if blog.author else "Unknown"
+            author_name=blog.author.name if blog.author else "Unknown",
+            likes=blog.likes, # type: ignore
+            dislikes=blog.dislikes, # type: ignore
+            date=blog.updated_at # type: ignore
         ))
 
     for comment in comments:
         results.append(schemas.SearchResult(
             type="comment",
-            id=comment.comment_id, # type: ignore
+            id=comment.blog_id, # type: ignore
             content=comment.content, # type: ignore
-            author_name=comment.user.name if comment.user else "Unknown"
+            author_name=comment.user.name if comment.user else "Unknown",
+            likes=comment.likes, # type: ignore
+            dislikes=comment.dislikes, # type: ignore
+            date=comment.created_at # type: ignore
         ))
 
     return results

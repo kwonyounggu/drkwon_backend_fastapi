@@ -39,6 +39,8 @@ class BlogListResponse(BaseModel):
     title: str
     #content: str
     rating: float
+    likes: int
+    dislikes: int
     num_views: int
     #visibility: str
     #is_hidden: bool
@@ -62,6 +64,8 @@ class BlogSpecificResponse(BaseModel):
     title: str
     content: str
     rating: float
+    likes: int
+    dislikes: int
     num_views: int
     visibility: str
     is_hidden: bool
@@ -85,6 +89,8 @@ class CommentCreate(BaseModel):
 class CommentResponse(BaseModel):
     comment_id: int
     content: str
+    likes: int
+    dislikes: int
     is_hidden: bool
     created_at: datetime
     user: UserResponse
@@ -126,6 +132,9 @@ class SearchResult(BaseModel):
     title: Optional[str] = None
     content: str
     author_name: Optional[str] = None
+    likes: int
+    dislikes: int
+    date: datetime
 
     class Config:
         from_attributes = True
