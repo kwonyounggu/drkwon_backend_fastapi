@@ -27,7 +27,8 @@ def read_blog(blog_id: int, db: Session = db_dependency):
     return db_blog
 
 #############
-# See https://chatgpt.com/c/67ef277f-3ff8-800a-95e3-c1e90d14fd96
+# See https://chatgpt.com/c/67ef277f-3ff8-800a-95e3-c1e90d14fd96, problem is sorting
+# fixed from https://grok.com/chat/c7c3ed2c-9cbd-4da8-b253-912ca626564c
 @blog_router.get("/", response_model=list[schemas.BlogListResponse])
 def read_blogs(
     visibility: Optional[str] = Query(None, description="Filter by visibility (public/doctor)"),
@@ -47,11 +48,13 @@ def read_blogs(
     query = query.filter(models.Blog.deleted_at == None)
 
     # Order by most recent
-    query = query.order_by(desc(models.Blog.updated_at))
+    query = query.order_by(desc(models.Blog.updated_at), desc(models.Blog.blog_id))
     
     # Pagination
     offset = (page - 1) * per_page
     blogs = query.offset(offset).limit(per_page).all()
+
+    #print(f"Page {page}, Per_page {per_page}: {[blog.title for blog in blogs]}")
     
     return blogs
 
