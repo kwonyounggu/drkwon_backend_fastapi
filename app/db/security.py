@@ -19,7 +19,7 @@ async def get_current_user(
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, constants.SECRET_KEY, algorithms=[constants.ALGORITHM])
+        payload = jwt.decode(token, constants.SECRET_KEY, algorithms=[constants.ALGORITHM]) # type: ignore
         user_id: int = payload.get("sub") # type: ignore
         if user_id is None:
             raise credentials_exception

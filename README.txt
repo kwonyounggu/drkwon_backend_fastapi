@@ -28,8 +28,8 @@ curl -X 'POST' 'http://localhost:8000/users/' \
 #to create tables at the first time
 #in virtual path of a terminal
 >python
-python>from app.database import engine
-python>from app.models import Base
+python>from app.db.database import engine, Base
+#python>from app.db.models import Base
 
 #the following will create tables in the connected eye_care database 
 Base.metadata.create_all(bind=engine)

@@ -18,12 +18,45 @@ blog_router = APIRouter(prefix="/blogs", tags=["Blogs"])
 #def create_blog(blog: schemas.BlogCreate, author_id: int, db: Session = db_dependency): # type: ignore
 #    return crud.create_blog(db, blog, author_id)
 
+# See https://grok.com/chat/4ba28422-595c-4b11-be92-e9633ca631d3
+# Like or dislike a blog
+@blog_router.post("/{blog_id}/reaction", response_model=schemas.BlogReactionResponse)
+def react_to_blog(
+    blog_id: int,
+    reaction: schemas.BlogReactionCreate,
+    db: Session = db_dependency,
+    current_user: schemas.UserResponse = Depends(get_current_user)
+):
+    
+    if reaction.reaction_type not in ["like", "dislike"]:
+        raise HTTPException(status_code=400, detail="Invalid reaction type")
+    return crud.create_or_update_reaction(db, blog_id, current_user.user_id, reaction)
+
+# Get user's reaction for a blog
+@blog_router.get("/{blog_id}/my-reaction", response_model=Optional[schemas.BlogReactionResponse])
+def get_my_reaction(
+    blog_id: int,
+    db: Session = db_dependency,
+    current_user: schemas.UserResponse = Depends(get_current_user)
+):
+    
+    reaction = crud.get_user_reaction(db, blog_id, current_user.user_id)
+    return reaction
 
 @blog_router.get("/{blog_id}", response_model=schemas.BlogSpecificResponse)
-def read_blog(blog_id: int, db: Session = db_dependency):
+def read_blog(
+    blog_id: int, 
+    db: Session = db_dependency,
+    current_user: schemas.UserResponse = Depends(get_current_user, use_cache=False)):
+
     db_blog = crud.get_blog(db, blog_id)
     if db_blog is None:
         raise HTTPException(status_code=404, detail="Blog not found with ${blog_id}")
+    
+    # Add user's reaction
+    reaction = crud.get_user_reaction(db, blog_id, current_user.user_id)
+    db_blog.user_reaction = reaction.reaction_type if reaction else None
+    
     return db_blog
 
 #############

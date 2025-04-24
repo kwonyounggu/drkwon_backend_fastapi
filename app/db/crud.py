@@ -263,5 +263,66 @@ def get_login_history(db: Session, user_id: int):
         return db.query(models.LoginHistory).filter(models.LoginHistory.user_id == user_id).all()
     except SQLAlchemyError:
         raise HTTPException(status_code=500, detail="Database error")
-    
-# 🚀 Now you’ve got fully functional CRUD functions for each model!
+
+# See https://grok.com/chat/4ba28422-595c-4b11-be92-e9633ca631d3    
+# Create or update a reaction for a blog
+def create_or_update_reaction(db: Session, blog_id: int, user_id: int, reaction: schemas.BlogReactionCreate):
+    try:
+        # Check if the user already has a reaction
+        existing_reaction = db.query(models.BlogReaction).filter(
+            models.BlogReaction.blog_id == blog_id,
+            models.BlogReaction.user_id == user_id
+        ).first()
+
+        # Get the blog
+        blog = db.query(models.Blog).filter(models.Blog.blog_id == blog_id).first()
+        if not blog:
+            raise HTTPException(status_code=404, detail="Blog not found")
+
+        if existing_reaction:
+            # If the same reaction, remove it (cancel)
+            if existing_reaction.reaction_type == reaction.reaction_type: # type: ignore
+                db.delete(existing_reaction)
+                if reaction.reaction_type == "like":
+                    blog.likes -= 1 # type: ignore
+                else:
+                    blog.dislikes -= 1 # type: ignore
+            # If different reaction, update it
+            else:
+                if existing_reaction.reaction_type == "like": # type: ignore
+                    blog.likes -= 1 # type: ignore
+                    blog.dislikes += 1 # type: ignore
+                else:
+                    blog.dislikes -= 1 # type: ignore
+                    blog.likes += 1 # type: ignore
+                existing_reaction.reaction_type = reaction.reaction_type # type: ignore
+        else:
+            # Create new reaction
+            db_reaction = models.BlogReaction(
+                blog_id=blog_id,
+                user_id=user_id,
+                reaction_type=reaction.reaction_type
+            )
+            db.add(db_reaction)
+            if reaction.reaction_type == "like":
+                blog.likes += 1 # type: ignore
+            else:
+                blog.dislikes += 1 # type: ignore
+
+        db.commit()
+        db.refresh(blog)
+        return existing_reaction or db_reaction
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to process reaction: {e}")
+
+# Get a user's reaction for a blog
+def get_user_reaction(db: Session, blog_id: int, user_id: int):
+    try:
+        reaction = db.query(models.BlogReaction).filter(
+            models.BlogReaction.blog_id == blog_id,
+            models.BlogReaction.user_id == user_id
+        ).first()
+        return reaction
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Database error")

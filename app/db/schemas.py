@@ -59,6 +59,20 @@ class BlogListResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# Schema for creating/updating a reaction
+class BlogReactionCreate(BaseModel):
+    reaction_type: str  # "like" or "dislike"
+
+# Schema for returning a reaction
+class BlogReactionResponse(BaseModel):
+    reaction_id: int
+    blog_id: int
+    user_id: int
+    reaction_type: str
+
+    class Config:
+        from_attributes = True
+
 class BlogSpecificResponse(BaseModel):
     blog_id: int
     title: str
@@ -79,6 +93,7 @@ class BlogSpecificResponse(BaseModel):
     keywords: str
     slug: str #A slug is a URL-friendly version of a blog title, typically lowercase, with spaces and special characters replaced by dashes.
     author: UserResponse
+    user_reaction: Optional[str] = None  # "like", "dislike", or None
 
     class Config:
         from_attributes = True

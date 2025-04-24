@@ -2,7 +2,7 @@
 from sqlalchemy import JSON, Column, Integer, String, Float, Boolean, TIMESTAMP, Text, ForeignKey, Enum
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
-from app.db.database import Base
+from app.db.database import Base, engine
 import enum
 
 #Gemini helped for the additional fields Mar 22 2025
@@ -147,3 +147,8 @@ class BlogReaction(Base):
 
     blog = relationship("Blog", back_populates="reactions")
     user = relationship("User")
+
+# Create only the blog_reactions table.
+BlogReaction.metadata.create_all(engine)
+
+print("Table 'blog_reactions' created successfully.")
