@@ -53,9 +53,12 @@ def read_blog(
     if db_blog is None:
         raise HTTPException(status_code=404, detail="Blog not found with ${blog_id}")
     
-    # Add user's reaction
-    reaction = crud.get_user_reaction(db, blog_id, current_user.user_id)
-    db_blog.user_reaction = reaction.reaction_type if reaction else None
+    # Add user's reaction only if authenticated
+    if current_user:
+        reaction = crud.get_user_reaction(db, blog_id, current_user.user_id)
+        db_blog.user_reaction = reaction.reaction_type if reaction else None
+    else:
+        db_blog.user_reaction = None
     
     return db_blog
 
