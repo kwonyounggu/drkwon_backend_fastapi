@@ -7,6 +7,7 @@
 //0.0.0.0: Allows external access to the server.
 //8000: Port FastAPI runs on 
 7. uvicorn main:app --host 0.0.0.0 --port 8000 //run fastapi framework, Keep the terminal open
+   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 8. screen uvicorn main:app --host 0.0.0.0 --port 8000 //run it in the background with screen, (Press CTRL + A + D to detach from the screen.)
 9. packages to be installed
    pip3 install python-jose google-auth requests 
@@ -40,3 +41,7 @@ see https://www.perplexity.ai/search/what-would-be-the-varchar-size-JkWFVzHhRLG0
 # See https://chatgpt.com/c/67f33623-a9d0-800a-a7d4-8bd1ea33cb17
 #mobile phone can be accessible
 >uvicorn app.main:app --host 0.0.0.0 --port 8000 
+>git init
+>git add .
+>git commit -m "message"
+>git push
